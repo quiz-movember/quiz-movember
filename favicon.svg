@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#E4ECF6"/>
+  <defs><path id="h" d="M100 24 C108 14 126 14 140 22 C152 29 164 30 172 24 C180 18 184 10 180 4 C186 14 184 26 174 34 C162 44 146 40 130 40 C116 40 106 40 100 36 Z"/></defs>
+  <g fill="#2A1E14" transform="translate(2 24.8) scale(0.3)">
+    <use href="#h" x="0"/><use href="#h" transform="translate(200,0) scale(-1,1)"/>
+  </g>
+</svg>

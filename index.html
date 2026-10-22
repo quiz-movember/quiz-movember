@@ -7,6 +7,20 @@
 <meta name="description" content="12 questions sur la moustache et la santé des hommes. Sans inscription, sans cookies.">
 <meta name="theme-color" content="#E4ECF6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F1A30" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://quiz-movember.github.io/quiz-movember/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="Quiz Movember">
+<meta property="og:title" content="Le quiz Movember">
+<meta property="og:description" content="12 questions sur la moustache et la santé des hommes. Sans inscription, sans cookies.">
+<meta property="og:url" content="https://quiz-movember.github.io/quiz-movember/">
+<meta property="og:image" content="https://quiz-movember.github.io/quiz-movember/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Une moustache et le titre « Le quiz Movember »">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
@@ -117,6 +131,7 @@ h2:focus { outline: none; }
 .help strong { font-weight: 800; }
 a { color: var(--accent); }
 .hidden { display: none; }
+.note { background: var(--bg); border-radius: 0.9rem; padding: 0.6rem 0.9rem; margin: -0.5rem 0 1.25rem; font-size: 0.9375rem; color: var(--muted); }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .share-status { text-align: center; min-height: 1.5em; margin: 0.5rem 0 0; }
 footer { text-align: center; line-height: 1.6; color: var(--muted); font-size: 0.875rem; margin-top: 1.5rem; }
@@ -159,7 +174,7 @@ footer { text-align: center; line-height: 1.6; color: var(--muted); font-size: 0
 
   <section id="intro">
     <h1>Le quiz Movember</h1>
-    <p class="lede">12 questions sur la moustache et la santé des hommes.</p>
+    <p class="lede">12 questions sur la moustache et la santé des hommes.<br>Un sujet sérieux, abordé avec le sourire : on apprend, et surtout on peut agir.</p>
     <button class="btn" id="start">Commencer le quiz</button>
     <button class="btn ghost hidden" id="resume"></button>
     <button class="btn ghost" id="shareIntro">Partager le quiz</button>
@@ -170,6 +185,7 @@ footer { text-align: center; line-height: 1.6; color: var(--muted); font-size: 0
     <div class="progress" id="progress"></div>
     <div class="qhead"><p class="count" id="count"></p><svg class="qicon" id="qicon" viewBox="0 0 64 64" aria-hidden="true"></svg></div>
     <h2 id="question" tabindex="-1"></h2>
+    <p class="note hidden" id="note"></p>
     <div class="options" id="options"></div>
     <div class="feedback" id="feedback" aria-live="polite">
       <p class="verdict" id="verdict"></p>
@@ -207,7 +223,7 @@ footer { text-align: center; line-height: 1.6; color: var(--muted); font-size: 0
     </div>
   </section>
 
-  <footer>Quiz à but informatif, il ne remplace pas un avis médical.<br>Chiffres : Santé publique France, Institut national du cancer, Movember.</footer>
+  <footer>Quiz à but informatif, il ne remplace pas un avis médical.<br>Chiffres : Santé publique France, Institut national du cancer, Movember.<span id="statsNote" class="hidden"><br>Visites comptées de façon anonyme, sans cookies.</span></footer>
 </main>
 
 <script>
@@ -238,8 +254,8 @@ const QUESTIONS = [
     e: "Une boule, un testicule plus gros ou plus dur, une sensation de lourdeur : même sans douleur, ces signes justifient un rendez-vous rapide. Ils ne veulent pas forcément dire cancer, mais mieux vaut faire vérifier.", ok: "Bien vu !", ko: "Pas tout à fait.",
     f: "Une boule, souvent indolore, est le signe le plus fréquent. Plus elle est repérée tôt, plus le traitement est simple.",
     g: "Des envies pressantes ou un jet faible qui durent ? Ce n’est pas forcément grave, mais parlez-en aussi à votre médecin." },
-  { ic: "pie", q: "Environ quelle part des suicides concerne des hommes ?", o: ["1 sur 4", "La moitié", "3 sur 4", "9 sur 10"], a: 2,
-    e: "Environ 3 suicides sur 4 sont le fait d’hommes. C’est pourquoi Movember encourage les hommes à parler, et leurs proches à leur tendre la main.", ok: "C’est ça.", ko: "Pas tout à fait.",
+  { ic: "pie", n: "Cette question et les deux suivantes sont plus sérieuses. Le sujet est difficile, mais en parler aide, et chacun peut agir.", q: "Environ quelle part des suicides concerne des hommes ?", o: ["1 sur 4", "La moitié", "3 sur 4", "9 sur 10"], a: 2,
+    e: "Environ 3 suicides sur 4 sont le fait d’hommes. C’est pourquoi Movember encourage les hommes à parler, et leurs proches à leur tendre la main. Parler aide vraiment, et chacun peut y contribuer.", ok: "C’est ça.", ko: "Pas tout à fait.",
     f: "En France, environ 9 000 décès par suicide chaque année, dont environ 3 sur 4 chez des hommes. Le taux de décès est environ trois fois plus élevé chez les hommes que chez les femmes.",
     g: "Un collègue vous inquiète ? Ne gardez pas ce doute pour vous : parlez-lui, et au besoin demandez conseil au 3114." },
   { ic: "phone", q: "Qui peut appeler le 3114 ?", o: ["Seulement une personne qui pense au suicide", "Toute personne en difficulté, mais aussi ses proches et les professionnels", "Uniquement les adultes, en journée", "Seulement sur recommandation d’un médecin"], a: 1,
@@ -259,6 +275,9 @@ const QUESTIONS = [
 const $ = id => document.getElementById(id);
 const N = QUESTIONS.length;
 const KEY = "quiz-movember";
+// Statistiques de visite anonymes, sans cookies (https://www.goatcounter.com).
+// Mettre ici le code du site GoatCounter (« xxx » pour xxx.goatcounter.com) ; vide = aucun compteur.
+const GOATCOUNTER = "";
 const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
 let i = 0, order = [], picks = [];
 
@@ -308,6 +327,7 @@ function renderQuestion() {
   renderProgress();
   $("count").textContent = `Question ${i + 1} sur ${N}`;
   $("question").textContent = item.q;
+  $("note").textContent = item.n || ""; $("note").classList.toggle("hidden", !item.n);
   $("qicon").innerHTML = `<use href="#ic-${item.ic}"/>`;
   const box = $("options");
   box.innerHTML = "";
@@ -374,7 +394,12 @@ function finish() {
   $("level").textContent = level;
 }
 
+function track(name, title) {
+  if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title, event: true });
+}
+
 function begin() {
+  track("quiz-demarre", "Quiz démarré");
   order = QUESTIONS.map(q => shuffle(q.o.length));
   picks = QUESTIONS.map(() => null);
   i = 0;
@@ -399,9 +424,11 @@ async function share(statusId) {
     if (navigator.share) {
       await navigator.share({ title: "Quiz Movember", text: SHARE_TEXT, url: SHARE_URL });
       out.textContent = "";
+      track("quiz-partage", "Quiz partagé");
     } else {
       await navigator.clipboard.writeText(`${SHARE_TEXT}\n${SHARE_URL}`);
       out.textContent = "Lien copié.";
+      track("quiz-partage", "Quiz partagé");
     }
   } catch (e) {
     out.textContent = e && e.name === "AbortError" ? "" : `Copiez ce lien : ${SHARE_URL}`;
@@ -411,10 +438,19 @@ async function share(statusId) {
 $("start").addEventListener("click", begin);
 $("restart").addEventListener("click", begin);
 $("resume").addEventListener("click", resume);
-$("next").addEventListener("click", () => { i++; save(); if (i < N) renderQuestion(); else finish(); });
+$("next").addEventListener("click", () => { i++; save(); if (i < N) renderQuestion(); else { track("quiz-termine", "Quiz terminé"); finish(); } });
 $("prev").addEventListener("click", () => { if (i > 0) { i--; save(); renderQuestion(); } });
 $("shareIntro").addEventListener("click", () => share("shareIntroStatus"));
 $("shareResult").addEventListener("click", () => share("shareResultStatus"));
+
+if (GOATCOUNTER) {
+  const g = document.createElement("script");
+  g.async = true;
+  g.dataset.goatcounter = `https://${GOATCOUNTER}.goatcounter.com/count`;
+  g.src = "https://gc.zgo.at/count.js";
+  document.head.appendChild(g);
+  $("statsNote").classList.remove("hidden");
+}
 
 setStache(0);
 const saved = load();
