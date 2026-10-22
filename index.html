@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiz Movember</title>
+<meta name="description" content="12 questions sur la moustache et la santé des hommes. Sans inscription, sans cookies.">
+<meta name="theme-color" content="#E4ECF6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #E4ECF6;
+  --surface: #FFFFFF;
+  --ink: #16233F;
+  --muted: #55627D;
+  --accent: #1F4FA8;
+  --stache: #2A1E14;
+  --good: #1D7A4E;
+  --good-bg: #DDF2E6;
+  --bad: #A8322A;
+  --bad-bg: #F8E1DE;
+  --line: #C7D3E6;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1A30; --surface: #182644; --ink: #EAF0FA; --muted: #A5B3CF;
+    --accent: #7FA8F5; --stache: #E9D7BF; --good: #6FD3A0; --good-bg: #183B2E;
+    --bad: #F29A90; --bad-bg: #3F2124; --line: #2C3C5E; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1A30; --surface: #182644; --ink: #EAF0FA; --muted: #A5B3CF;
+  --accent: #7FA8F5; --stache: #E9D7BF; --good: #6FD3A0; --good-bg: #183B2E;
+  --bad: #F29A90; --bad-bg: #3F2124; --line: #2C3C5E; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 1.0625rem; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+main { max-width: 34rem; margin: 0 auto; padding: 1.25rem 1.25rem 2.5rem; }
+.stache-wrap { display: flex; justify-content: center; padding: 1.25rem 0 0.5rem; }
+.stache {
+  width: 14rem; height: auto; color: var(--stache);
+}
+#revealRect { transform-origin: 14px 0; transition: transform 0.7s ease-out; }
+h1 { font-weight: 800; font-size: clamp(2rem, 8vw, 2.75rem); line-height: 1.05; letter-spacing: -0.02em; margin: 0.5rem 0 0.75rem; text-align: center; }
+.lede { color: var(--muted); text-align: center; margin: 0 0 1.75rem; }
+.panel { background: var(--surface); border-radius: 1.25rem; padding: 1.5rem 1.25rem; }
+.progress { display: flex; gap: 0.3rem; margin-bottom: 1.25rem; }
+.progress span { flex: 1; height: 0.35rem; border-radius: 1rem; background: var(--line); transition: background 0.3s; }
+.progress span.done { background: var(--accent); }
+.count { color: var(--muted); font-size: 0.9375rem; margin: 0 0 0.35rem; }
+.qhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.qicon, .ic { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; color: var(--accent); }
+.qicon { width: 3.5rem; height: 3.5rem; flex: none; margin-top: -0.25rem; }
+h2 { font-size: 1.375rem; line-height: 1.25; font-weight: 600; margin: 0 0 1.25rem; }
+.options { display: grid; gap: 0.6rem; }
+.opt {
+  font: inherit; color: var(--ink); text-align: left;
+  background: transparent; border: 2px solid var(--line); border-radius: 0.9rem;
+  padding: 0.85rem 1rem; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+}
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt:focus-visible, .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.opt:disabled { cursor: default; }
+.opt.right { border-color: var(--good); background: var(--good-bg); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-bg); }
+.opt.dim { opacity: 0.55; }
+.opt.right::after { content: " ✓"; font-weight: 800; color: var(--good); }
+.opt.wrong::after { content: " ✗"; font-weight: 800; color: var(--bad); }
+h2:focus { outline: none; }
+.feedback { margin-top: 1.25rem; display: none; }
+.feedback.show { display: block; }
+.verdict { font-weight: 800; margin: 0 0 0.35rem; }
+.verdict.good { color: var(--good); }
+.verdict.bad { color: var(--bad); }
+.explain { margin: 0 0 1.25rem; }
+.btn {
+  font: inherit; font-weight: 600; width: 100%;
+  background: var(--accent); color: var(--surface); border: 0; border-radius: 0.9rem;
+  padding: 0.95rem 1rem; cursor: pointer;
+}
+.btn.ghost { background: transparent; color: var(--accent); border: 2px solid var(--accent); margin-top: 0.75rem; }
+.score { font-size: clamp(3.5rem, 18vw, 5rem); font-weight: 800; line-height: 1; text-align: center; margin: 0.25rem 0; }
+.level { text-align: center; font-weight: 600; font-size: 1.25rem; margin: 0 0 1.25rem; }
+.box { border-radius: 0.9rem; padding: 0.85rem 1rem; margin: 0 0 0.75rem; background: var(--bg); }
+.box p { margin: 0; }
+.box .tag { font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.25rem; }
+.box.act { border: 2px solid var(--accent); background: transparent; }
+.box.act .tag { color: var(--accent); }
+.feedback .btn { margin-top: 0.5rem; }
+.gestures { list-style: none; margin: 0 0 0.75rem; padding: 0; display: grid; gap: 0.6rem; }
+.gestures li { display: flex; gap: 0.9rem; align-items: center; background: var(--bg); border-radius: 0.9rem; padding: 0.75rem 1rem; }
+.gestures p { margin: 0; font-size: 0.975rem; min-width: 0; }
+.gestures .ic { width: 2.75rem; height: 2.75rem; flex: none; }
+.plan-title { font-size: 1.125rem; font-weight: 800; margin: 1.5rem 0 0.75rem; }
+.plan { list-style: none; margin: 0 0 1.25rem; padding: 0; display: grid; gap: 0.6rem; font-size: 0.975rem; }
+.plan li { background: var(--bg); border-radius: 0.9rem; padding: 0.75rem 1rem; }
+.help { border-top: 2px solid var(--line); margin-top: 1.5rem; padding-top: 1.25rem; font-size: 0.975rem; }
+.help p { margin: 0 0 0.75rem; }
+.help strong { font-weight: 800; }
+a { color: var(--accent); }
+.hidden { display: none; }
+footer { text-align: center; line-height: 1.6; color: var(--muted); font-size: 0.875rem; margin-top: 1.5rem; }
+@media (prefers-reduced-motion: reduce) { #revealRect { transition: none; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="ic-cal" viewBox="0 0 64 64"><rect x="10" y="14" width="44" height="40" rx="6"/><path d="M10 27H54M20 8V19M44 8V19"/><path d="M22 44C26 37 32 40 32 43C32 40 38 37 42 44C38 48 34 46 32 45C30 46 26 48 22 44Z" fill="currentColor"/></symbol>
+    <symbol id="ic-calcheck" viewBox="0 0 64 64"><rect x="10" y="14" width="44" height="40" rx="6"/><path d="M10 27H54M20 8V19M44 8V19M23 41L29 47L42 34"/></symbol>
+    <symbol id="ic-globe" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22"/><ellipse cx="32" cy="32" rx="10" ry="22"/><path d="M10 32H54M14 20H50M14 44H50"/></symbol>
+    <symbol id="ic-trio" viewBox="0 0 64 64"><circle cx="32" cy="18" r="8"/><circle cx="18" cy="44" r="8"/><circle cx="46" cy="44" r="8"/><path d="M28 25L21 37M36 25L43 37M26 44H38"/></symbol>
+    <symbol id="ic-duo" viewBox="0 0 64 64"><circle cx="24" cy="22" r="8"/><path d="M8 52C8 38 40 38 40 52"/><circle cx="46" cy="26" r="6"/><path d="M42 40C50 38 58 42 58 52"/></symbol>
+    <symbol id="ic-clock" viewBox="0 0 64 64"><path d="M12 30C12 18 24 10 34 12C46 14 54 24 52 36C50 46 46 50 42 54C40 50 38 48 34 47C28 51 22 53 18 48C12 44 12 38 12 30Z"/><path d="M32 30V20M32 30L40 34"/></symbol>
+    <symbol id="ic-shield" viewBox="0 0 64 64"><path d="M32 8L52 16V32C52 44 44 52 32 58C20 52 12 44 12 32V16Z"/><path d="M23 33L30 40L42 26"/></symbol>
+    <symbol id="ic-bars" viewBox="0 0 64 64"><path d="M6 54H58"/><rect x="10" y="40" width="9" height="14" rx="2"/><rect x="23" y="16" width="9" height="38" rx="2" fill="currentColor"/><rect x="36" y="28" width="9" height="26" rx="2"/><rect x="49" y="44" width="9" height="10" rx="2"/></symbol>
+    <symbol id="ic-lens" viewBox="0 0 64 64"><circle cx="27" cy="27" r="15"/><path d="M38 38L54 54"/><path d="M21 27H33M27 21V33"/></symbol>
+    <symbol id="ic-pie" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22"/><path d="M32 32V10A22 22 0 1 1 10 32Z" fill="currentColor"/></symbol>
+    <symbol id="ic-phone" viewBox="0 0 64 64"><rect x="18" y="6" width="28" height="52" rx="6"/><path d="M28 50H36"/><text x="32" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="currentColor" stroke="none" font-family="inherit">3114</text></symbol>
+    <symbol id="ic-chat" viewBox="0 0 64 64"><path d="M8 12H40A4 4 0 0 1 44 16V32A4 4 0 0 1 40 36H26L16 45V36H8A4 4 0 0 1 4 32V16A4 4 0 0 1 8 12Z"/><path d="M22 46H34L44 55V46H56A4 4 0 0 0 60 42V28" fill="none"/><path d="M12 22H36M12 28H28"/></symbol>
+    <symbol id="ic-route" viewBox="0 0 64 64"><path d="M12 52C26 52 18 36 32 36C46 36 38 20 52 20" stroke-dasharray="1 7"/><circle cx="12" cy="52" r="4" fill="currentColor"/><path d="M52 8V22M52 8H62L58 13L62 18H52"/></symbol>
+  </defs>
+</svg>
+<main>
+  <div class="stache-wrap" aria-hidden="true">
+    <svg class="stache" id="stache" viewBox="0 0 200 48" fill="none">
+      <defs>
+        <path id="half" d="M100 24 C108 14 126 14 140 22 C152 29 164 30 172 24 C180 18 184 10 180 4 C186 14 184 26 174 34 C162 44 146 40 130 40 C116 40 106 40 100 36 Z"/>
+        <clipPath id="reveal"><rect id="revealRect" x="14" y="0" width="172" height="48"/></clipPath>
+      </defs>
+      <g stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity="0.55">
+        <use href="#half"/><use href="#half" transform="translate(200,0) scale(-1,1)"/>
+      </g>
+      <g clip-path="url(#reveal)" fill="currentColor">
+        <use href="#half"/><use href="#half" transform="translate(200,0) scale(-1,1)"/>
+      </g>
+    </svg>
+  </div>
+
+  <section id="intro">
+    <h1>Le quiz Movember</h1>
+    <p class="lede">12 questions sur la moustache et la santé des hommes.</p>
+    <button class="btn" id="start">Commencer le quiz</button>
+  </section>
+
+  <section id="quiz" class="panel hidden" aria-labelledby="question">
+    <div class="progress" id="progress"></div>
+    <div class="qhead"><p class="count" id="count"></p><svg class="qicon" id="qicon" viewBox="0 0 64 64" aria-hidden="true"></svg></div>
+    <h2 id="question" tabindex="-1"></h2>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback" aria-live="polite">
+      <p class="verdict" id="verdict"></p>
+      <p class="explain" id="explain"></p>
+      <div class="box fact hidden" id="fact"><p class="tag">À retenir</p><p id="factText"></p></div>
+      <div class="box act hidden" id="act"><p class="tag">À faire</p><p id="actText"></p></div>
+      <button class="btn" id="next">Question suivante</button>
+    </div>
+  </section>
+
+  <section id="result" class="panel hidden">
+    <p class="score" id="score"></p>
+    <p class="level" id="level"></p>
+    <div class="keep">
+      <h3 class="plan-title">3 gestes à garder</h3>
+      <ul class="gestures">
+        <li><svg class="ic" viewBox="0 0 64 64" aria-hidden="true"><use href="#ic-calcheck"/></svg><p><strong>Chaque mois</strong>, sous la douche, palpez chaque testicule. Un changement ? Consultez.</p></li>
+        <li><svg class="ic" viewBox="0 0 64 64" aria-hidden="true"><use href="#ic-shield"/></svg><p><strong>À partir de 50 ans</strong> (plus tôt s’il y a des antécédents familiaux), parlez de la prostate à votre médecin.</p></li>
+        <li><svg class="ic" viewBox="0 0 64 64" aria-hidden="true"><use href="#ic-phone"/></svg><p><strong>3114</strong> pour vous ou pour un proche. Gratuit, 24h/24, 7j/7.</p></li>
+      </ul>
+      <p class="count">Astuce : faites une capture d’écran pour les garder sur votre téléphone.</p>
+    </div>
+    <h3 class="plan-title">Et maintenant, passez à l’action</h3>
+    <ul class="plan">
+      <li><strong>Pour un collègue.</strong> Demandez, écoutez, encouragez, recontactez : une conversation de cinq minutes peut tout changer.</li>
+      <li><strong>Pour votre équipe.</strong> Lancez un défi entre collègues, ici en France : 60 km à plusieurs en novembre, en marchant, en courant ou à vélo. Et parlez-en autour de vous, y compris sur les réseaux avec #Movember #SantéMasculine.</li>
+      <li><strong>Pour s’informer en français.</strong> <a href="https://www.cancer.fr" target="_blank" rel="noopener">cancer.fr</a> (Institut national du cancer), <a href="https://www.ligue-cancer.net" target="_blank" rel="noopener">ligue-cancer.net</a> (Ligue contre le cancer), <a href="https://3114.fr" target="_blank" rel="noopener">3114.fr</a> (prévention du suicide).</li>
+    </ul>
+    <button class="btn" id="restart">Rejouer</button>
+    <div class="help">
+      <p>Movember, c’est aussi l’occasion de prendre des nouvelles de ceux qui vous entourent. Si vous ou un proche traversez une période difficile, le <strong>3114</strong> est le numéro national de prévention du suicide, gratuit et joignable 24h/24, 7j/7.</p>
+    </div>
+  </section>
+
+  <footer>Quiz à but informatif, il ne remplace pas un avis médical.<br>Chiffres : Santé publique France, Movember.</footer>
+</main>
+
+<script>
+const QUESTIONS = [
+  { ic: "cal", q: "D’où vient le nom « Movember » ?", o: ["De « Moustache » et « November »", "De « Movement » et « Member »", "Du nom de son fondateur", "D’un mot aborigène australien"], a: 0,
+    e: "C’est la contraction de « moustache » (surnommée « Mo ») et « November ». Pendant tout le mois, la moustache sert de ruban de sensibilisation.", ok: "Bien vu !", ko: "Pas tout à fait." },
+  { ic: "globe", q: "Où et quand Movember est-il né ?", o: ["À Toronto, en 1999", "À Melbourne, en 2003", "À Londres, en 2008", "À Paris, en 2012"], a: 1,
+    e: "Deux amis, Travis Garone et Luke Slattery, ont lancé l’idée à Melbourne en 2003, autour d’un verre.", ok: "Exact !", ko: "Pas tout à fait.",
+    f: "Parti d’Australie, le mouvement est devenu international. Il est arrivé en France en 2012, selon la presse." },
+  { ic: "trio", q: "Lequel de ces sujets ne fait PAS partie des trois causes de Movember ?", o: ["Le cancer de la prostate", "Le cancer des testicules", "Le diabète", "La santé mentale et la prévention du suicide"], a: 2,
+    e: "Movember se concentre sur le cancer de la prostate, le cancer des testicules, et la santé mentale avec la prévention du suicide.", ok: "Parfait !", ko: "Pas celle-là.",
+    f: "Ces trois sujets ont un point commun : plus on les repère tôt, mieux on peut agir." },
+  { ic: "duo", q: "Comment appelle-t-on les participantes à Movember ?", o: ["Les Mo Ladies", "Les Mo Sistas", "Les Moustachettes", "Les Mo Queens"], a: 1,
+    e: "Les hommes sont les « Mo Bros » et les femmes les « Mo Sistas ». Pas besoin de moustache pour participer !", ok: "Bravo !", ko: "Presque !",
+    f: "La santé des hommes concerne aussi leur entourage : conjointes, amies, collègues, familles." },
+  { ic: "clock", q: "Quel peintre est célèbre pour sa moustache fine aux pointes relevées vers le ciel ?", o: ["Pablo Picasso", "Claude Monet", "Salvador Dalí", "Vincent van Gogh"], a: 2,
+    e: "La moustache de Dalí est devenue aussi iconique que ses montres molles. Une bonne source d’inspiration pour novembre.", ok: "Surréaliste, mais exact !", ko: "Non, c’est un autre artiste.",
+    f: "Dalí avait fait de sa moustache sa signature : un détail qu’on remarque, dont on parle. C’est l’idée de Movember." },
+  { ic: "shield", q: "En France, quel est le cancer le plus fréquent chez l’homme ?", o: ["Le cancer du poumon", "Le cancer colorectal", "Le cancer de la prostate", "Le cancer de la peau"], a: 2,
+    e: "Le cancer de la prostate est le plus fréquent chez l’homme en France. Détecté tôt, il se soigne bien.", ok: "C’est ça.", ko: "Ce n’est pas celui-là.",
+    f: "Environ 60 000 nouveaux cas par an en France. Dans plus de 8 cas sur 10, la tumeur est encore localisée au moment du diagnostic, et la survie à 5 ans est d’environ 93 %.",
+    g: "Dès 50 ans, ou plus tôt s’il y a des cas dans votre famille, parlez-en à votre médecin : il vous dira si un dosage du PSA a un intérêt pour vous." },
+  { ic: "bars", q: "Le cancer des testicules touche surtout quelle tranche d’âge ?", o: ["15 à 20 ans", "20 à 35 ans", "50 à 65 ans", "Plus de 70 ans"], a: 1,
+    e: "Il est rare mais touche surtout les jeunes hommes de 20 à 35 ans. Une autopalpation régulière permet de repérer un changement tôt, et il se guérit très bien.", ok: "Bonne réponse !", ko: "Pas tout à fait.",
+    f: "Environ 2 500 nouveaux cas par an en France, avec un âge médian de 36 ans au diagnostic. Plus de 9 hommes sur 10 sont en vie 5 ans après.",
+    g: "Une fois par mois, sous la douche, palpez chaque testicule. Une boule, un durcissement ou un changement de taille ? Consultez sans attendre." },
+  { ic: "lens", q: "Lequel de ces signes doit vous pousser à consulter ?", o: ["Une boule ou un changement de taille d’un testicule", "Une moustache qui pousse de travers", "Des cheveux qui blanchissent", "Une courbature après le sport"], a: 0,
+    e: "Une boule, un testicule plus gros ou plus dur, une sensation de lourdeur : même sans douleur, ces signes justifient un rendez-vous rapide. Ils ne veulent pas forcément dire cancer, mais mieux vaut faire vérifier.", ok: "Bien vu !", ko: "Pas tout à fait.",
+    f: "Une boule, souvent indolore, est le signe le plus fréquent. Plus elle est repérée tôt, plus le traitement est simple.",
+    g: "Des envies pressantes ou un jet faible qui durent ? Ce n’est pas forcément grave, mais parlez-en aussi à votre médecin." },
+  { ic: "pie", q: "Environ quelle part des suicides concerne des hommes ?", o: ["1 sur 4", "La moitié", "3 sur 4", "9 sur 10"], a: 2,
+    e: "Environ 3 suicides sur 4 sont le fait d’hommes. C’est pourquoi Movember encourage les hommes à parler, et leurs proches à leur tendre la main.", ok: "C’est ça.", ko: "Pas tout à fait.",
+    f: "En France, environ 9 000 décès par suicide chaque année, dont environ 3 sur 4 chez des hommes. Les hommes de 45 ans et plus sont les plus touchés.",
+    g: "Un collègue vous inquiète ? Ne gardez pas ce doute pour vous : parlez-lui, et au besoin demandez conseil au 3114." },
+  { ic: "phone", q: "Qui peut appeler le 3114 ?", o: ["Seulement une personne qui pense au suicide", "Toute personne en difficulté, mais aussi ses proches et les professionnels", "Uniquement les adultes, en journée", "Seulement sur recommandation d’un médecin"], a: 1,
+    e: "Le 3114 est gratuit et ouvert 24h/24, 7j/7. Il répond aux personnes qui pensent au suicide, à leur entourage et aux professionnels, avec des soignants formés (infirmiers, psychologues).", ok: "Exactement !", ko: "Pas tout à fait.",
+    f: "Appeler pour un proche est possible : le 3114 aide à savoir quoi dire et quoi faire.",
+    g: "Enregistrez le 3114 dans vos contacts dès maintenant. Le jour où vous en aurez besoin, il sera déjà là." },
+  { ic: "chat", q: "Movember propose une méthode simple pour aider un proche qui ne va pas bien. Que signifie-t-elle ?", o: ["Demander, écouter, encourager, recontacter", "Conseiller, juger, rassurer, oublier", "Attendre qu’il en parle de lui-même", "Lui changer les idées sans aborder le sujet"], a: 0,
+    e: "C’est la méthode ALEC (Ask, Listen, Encourage action, Check in) : poser la question, écouter sans juger, encourager à agir, puis prendre des nouvelles.", ok: "Exactement !", ko: "Pas vraiment : l’idée est d’aller vers l’autre.",
+    f: "Poser la question ne donne pas l’idée de passer à l’acte : c’est souvent un soulagement pour la personne.",
+    g: "Cette semaine, prenez des nouvelles d’un collègue avec une vraie question : « Comment ça va, vraiment ? », puis laissez-le répondre." },
+  { ic: "route", q: "Quel est le défi sportif « Move » proposé par Movember ?", o: ["Faire 10 000 pas par jour", "Parcourir 60 km dans le mois", "Courir un marathon", "Faire 100 pompes par jour"], a: 1,
+    e: "60 km en novembre, en courant, en marchant ou à vélo : un kilomètre pour chacun des 60 hommes qui, selon Movember, meurent par suicide chaque heure dans le monde.", ok: "Bien joué !", ko: "Pas celui-là.",
+    f: "Courir, marcher ou pédaler : toutes les activités comptent, seul ou en équipe. Mettre en commun les kilomètres d’un étage ou d’une équipe rend le défi plus facile à tenir.",
+    g: "Lancez un défi à votre équipe ou à vos voisins de bureau : 60 km à plusieurs en novembre, près de chez vous. Parlez-en autour de vous." }
+];
+
+const $ = id => document.getElementById(id);
+const stache = $("stache");
+let i = 0, score = 0;
+
+function setStache(n) {
+  $("revealRect").style.transform = `scaleX(${n / QUESTIONS.length})`;
+}
+
+function show(id) {
+  ["intro", "quiz", "result"].forEach(s => $(s).classList.toggle("hidden", s !== id));
+  window.scrollTo(0, 0);
+}
+
+function renderProgress() {
+  $("progress").innerHTML = QUESTIONS.map((_, k) => `<span class="${k < i ? "done" : ""}"></span>`).join("");
+}
+
+function renderQuestion() {
+  const item = QUESTIONS[i];
+  renderProgress();
+  $("count").textContent = `Question ${i + 1} sur ${QUESTIONS.length}`;
+  $("question").textContent = item.q;
+  $("qicon").innerHTML = `<use href="#ic-${item.ic}"/>`;
+  $("feedback").classList.remove("show");
+  const box = $("options");
+  box.innerHTML = "";
+  item.o.forEach((text, k) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = text;
+    b.addEventListener("click", () => answer(k));
+    box.appendChild(b);
+  });
+  if (i > 0) $("question").focus({ preventScroll: true });
+  $("next").textContent = i === QUESTIONS.length - 1 ? "Voir mon score" : "Question suivante";
+}
+
+function answer(k) {
+  const item = QUESTIONS[i];
+  const btns = [...$("options").children];
+  btns.forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.a) b.classList.add("right");
+    else if (idx === k) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  const good = k === item.a;
+  if (good) score++;
+  setStache(i + 1);
+  const v = $("verdict");
+  v.textContent = good ? item.ok : item.ko;
+  v.className = "verdict " + (good ? "good" : "bad");
+  $("explain").textContent = item.e;
+  const x = item;
+  $("factText").textContent = x.f || ""; $("fact").classList.toggle("hidden", !x.f);
+  $("actText").textContent = x.g || ""; $("act").classList.toggle("hidden", !x.g);
+  $("feedback").classList.add("show");
+  $("next").focus({ preventScroll: true });
+  $("feedback").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function finish() {
+  show("result");
+  $("score").textContent = `${score}/${QUESTIONS.length}`;
+  let level;
+  if (score <= 3) level = "Duvet naissant : la moustache ne demande qu’à pousser.";
+  else if (score <= 6) level = "Moustache prometteuse : encore quelques jours de novembre et c’est gagné.";
+  else if (score <= 9) level = "Belle bacchante : vous en savez déjà beaucoup.";
+  else level = "Moustache légendaire : Dalí serait fier de vous.";
+  $("level").textContent = level;
+}
+
+$("start").addEventListener("click", () => { i = 0; score = 0; setStache(0); show("quiz"); renderQuestion(); });
+$("next").addEventListener("click", () => { i++; if (i < QUESTIONS.length) renderQuestion(); else finish(); });
+$("restart").addEventListener("click", () => { i = 0; score = 0; setStache(0); show("quiz"); renderQuestion(); });
+
+setStache(0);
+</script>
+</body>
+</html>
