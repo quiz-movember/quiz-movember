@@ -400,7 +400,7 @@ async function share(statusId) {
       await navigator.share({ title: "Quiz Movember", text: SHARE_TEXT, url: SHARE_URL });
       out.textContent = "";
     } else {
-      await navigator.clipboard.writeText(`${SHARE_URL}\n${SHARE_TEXT}`);
+      await navigator.clipboard.writeText(`${SHARE_TEXT}\n${SHARE_URL}`);
       out.textContent = "Lien copié.";
     }
   } catch (e) {
