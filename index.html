@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Quiz Movember</title>
 <meta name="description" content="12 questions sur la moustache et la santé des hommes. Sans inscription, sans cookies.">
-<meta name="theme-color" content="#E4ECF6">
+<meta name="theme-color" content="#E4ECF6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1A30" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
@@ -46,7 +47,8 @@ body {
   font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 1.0625rem; line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh; min-height: 100dvh;
+  min-height: 100vh;
+  min-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: column; justify-content: center;
 }
 main { width: 100%; max-width: 34rem; margin: 0 auto; padding: 1.25rem 1.25rem 2.5rem; }
@@ -70,14 +72,15 @@ h2 { font-size: 1.375rem; line-height: 1.25; font-weight: 600; margin: 0 0 1.25r
 .opt {
   font: inherit; color: var(--ink); text-align: left;
   background: transparent; border: 2px solid var(--line); border-radius: 0.9rem;
-  padding: 0.85rem 1rem; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  padding: 0.85rem 1rem; min-height: 2.75rem; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
 .opt:hover:not(:disabled) { border-color: var(--accent); }
 .opt:focus-visible, .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .opt:disabled { cursor: default; }
 .opt.right { border-color: var(--good); background: var(--good-bg); }
 .opt.wrong { border-color: var(--bad); background: var(--bad-bg); }
-.opt.dim { opacity: 0.55; }
+.opt.dim { opacity: 0.7; }
 .opt.right::after { content: " ✓"; font-weight: 800; color: var(--good); }
 .opt.wrong::after { content: " ✗"; font-weight: 800; color: var(--bad); }
 h2:focus { outline: none; }
@@ -90,7 +93,8 @@ h2:focus { outline: none; }
 .btn {
   font: inherit; font-weight: 600; width: 100%;
   background: var(--accent); color: var(--surface); border: 0; border-radius: 0.9rem;
-  padding: 0.95rem 1rem; cursor: pointer;
+  padding: 0.95rem 1rem; min-height: 2.75rem; cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
 .btn.ghost { background: transparent; color: var(--accent); border: 2px solid var(--accent); margin-top: 0.75rem; }
 .score { font-size: clamp(3.5rem, 18vw, 5rem); font-weight: 800; line-height: 1; text-align: center; margin: 0.25rem 0; }
@@ -113,6 +117,8 @@ h2:focus { outline: none; }
 .help strong { font-weight: 800; }
 a { color: var(--accent); }
 .hidden { display: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.share-status { text-align: center; min-height: 1.5em; margin: 0.5rem 0 0; }
 footer { text-align: center; line-height: 1.6; color: var(--muted); font-size: 0.875rem; margin-top: 1.5rem; }
 @media (prefers-reduced-motion: reduce) { #revealRect { transition: none; } }
 </style>
@@ -155,6 +161,9 @@ footer { text-align: center; line-height: 1.6; color: var(--muted); font-size: 0
     <h1>Le quiz Movember</h1>
     <p class="lede">12 questions sur la moustache et la santé des hommes.</p>
     <button class="btn" id="start">Commencer le quiz</button>
+    <button class="btn ghost hidden" id="resume"></button>
+    <button class="btn ghost" id="shareIntro">Partager le quiz</button>
+    <p class="count share-status" id="shareIntroStatus" role="status"></p>
   </section>
 
   <section id="quiz" class="panel hidden" aria-labelledby="question">
@@ -169,6 +178,7 @@ footer { text-align: center; line-height: 1.6; color: var(--muted); font-size: 0
       <div class="box act hidden" id="act"><p class="tag">À faire</p><p id="actText"></p></div>
       <button class="btn" id="next">Question suivante</button>
     </div>
+    <button class="btn ghost hidden" id="prev">← Question précédente</button>
   </section>
 
   <section id="result" class="panel hidden">
@@ -190,12 +200,14 @@ footer { text-align: center; line-height: 1.6; color: var(--muted); font-size: 0
       <li><strong>Pour s’informer en français.</strong> <a href="https://www.cancer.fr" target="_blank" rel="noopener">cancer.fr</a> (Institut national du cancer), <a href="https://www.ligue-cancer.net" target="_blank" rel="noopener">ligue-cancer.net</a> (Ligue contre le cancer), <a href="https://3114.fr" target="_blank" rel="noopener">3114.fr</a> (prévention du suicide).</li>
     </ul>
     <button class="btn" id="restart">Rejouer</button>
+    <button class="btn ghost" id="shareResult">Partager le quiz</button>
+    <p class="count share-status" id="shareResultStatus" role="status"></p>
     <div class="help">
       <p>Movember, c’est aussi l’occasion de prendre des nouvelles de ceux qui vous entourent. Si vous ou un proche traversez une période difficile, le <strong>3114</strong> est le numéro national de prévention du suicide, gratuit et joignable 24h/24, 7j/7.</p>
     </div>
   </section>
 
-  <footer>Quiz à but informatif, il ne remplace pas un avis médical.<br>Chiffres : Santé publique France, Movember.</footer>
+  <footer>Quiz à but informatif, il ne remplace pas un avis médical.<br>Chiffres : Santé publique France, Institut national du cancer (estimations 2018, survie 2010-2015), Movember.</footer>
 </main>
 
 <script>
@@ -205,8 +217,8 @@ const QUESTIONS = [
   { ic: "globe", q: "Où et quand Movember est-il né ?", o: ["À Toronto, en 1999", "À Melbourne, en 2003", "À Londres, en 2008", "À Paris, en 2012"], a: 1,
     e: "Deux amis, Travis Garone et Luke Slattery, ont lancé l’idée à Melbourne en 2003, autour d’un verre.", ok: "Exact !", ko: "Pas tout à fait.",
     f: "Parti d’Australie, le mouvement est devenu international. Il est arrivé en France en 2012, selon la presse." },
-  { ic: "trio", q: "Lequel de ces sujets ne fait PAS partie des trois causes de Movember ?", o: ["Le cancer de la prostate", "Le cancer des testicules", "Le diabète", "La santé mentale et la prévention du suicide"], a: 2,
-    e: "Movember se concentre sur le cancer de la prostate, le cancer des testicules, et la santé mentale avec la prévention du suicide.", ok: "Parfait !", ko: "Pas celle-là.",
+  { ic: "trio", q: "Parmi ces sujets, lequel fait partie des trois grandes causes de Movember ?", o: ["Le diabète", "Les maladies cardiovasculaires", "La santé mentale et la prévention du suicide", "La maladie d’Alzheimer"], a: 2,
+    e: "Movember se concentre sur le cancer de la prostate, le cancer des testicules, et la santé mentale avec la prévention du suicide.", ok: "Parfait !", ko: "Pas tout à fait.",
     f: "Ces trois sujets ont un point commun : plus on les repère tôt, mieux on peut agir." },
   { ic: "duo", q: "Comment appelle-t-on les participantes à Movember ?", o: ["Les Mo Ladies", "Les Mo Sistas", "Les Moustachettes", "Les Mo Queens"], a: 1,
     e: "Les hommes sont les « Mo Bros » et les femmes les « Mo Sistas ». Pas besoin de moustache pour participer !", ok: "Bravo !", ko: "Presque !",
@@ -216,11 +228,11 @@ const QUESTIONS = [
     f: "Dalí avait fait de sa moustache sa signature : un détail qu’on remarque, dont on parle. C’est l’idée de Movember." },
   { ic: "shield", q: "En France, quel est le cancer le plus fréquent chez l’homme ?", o: ["Le cancer du poumon", "Le cancer colorectal", "Le cancer de la prostate", "Le cancer de la peau"], a: 2,
     e: "Le cancer de la prostate est le plus fréquent chez l’homme en France. Détecté tôt, il se soigne bien.", ok: "C’est ça.", ko: "Ce n’est pas celui-là.",
-    f: "Environ 60 000 nouveaux cas par an en France. Dans plus de 8 cas sur 10, la tumeur est encore localisée au moment du diagnostic, et la survie à 5 ans est d’environ 93 %.",
+    f: "Environ 60 000 nouveaux cas par an en France (59 885 estimés en 2018). Dans plus de 8 cas sur 10, la tumeur est encore localisée au moment du diagnostic, et la survie nette à 5 ans est d’environ 93 % (diagnostics de 2010 à 2015).",
     g: "Dès 50 ans, ou plus tôt s’il y a des cas dans votre famille, parlez-en à votre médecin : il vous dira si un dosage du PSA a un intérêt pour vous." },
   { ic: "bars", q: "Le cancer des testicules touche surtout quelle tranche d’âge ?", o: ["15 à 20 ans", "20 à 35 ans", "50 à 65 ans", "Plus de 70 ans"], a: 1,
     e: "Il est rare mais touche surtout les jeunes hommes de 20 à 35 ans. Une autopalpation régulière permet de repérer un changement tôt, et il se guérit très bien.", ok: "Bonne réponse !", ko: "Pas tout à fait.",
-    f: "Environ 2 500 nouveaux cas par an en France, avec un âge médian de 36 ans au diagnostic. Plus de 9 hommes sur 10 sont en vie 5 ans après.",
+    f: "Environ 2 700 nouveaux cas par an en France (2 769 estimés en 2018), avec un âge médian de 36 ans au diagnostic. Plus de 9 hommes sur 10 sont en vie 5 ans après (diagnostics de 2010 à 2015).",
     g: "Une fois par mois, sous la douche, palpez chaque testicule. Une boule, un durcissement ou un changement de taille ? Consultez sans attendre." },
   { ic: "lens", q: "Lequel de ces signes doit vous pousser à consulter ?", o: ["Une boule ou un changement de taille d’un testicule", "Une moustache qui pousse de travers", "Des cheveux qui blanchissent", "Une courbature après le sport"], a: 0,
     e: "Une boule, un testicule plus gros ou plus dur, une sensation de lourdeur : même sans douleur, ces signes justifient un rendez-vous rapide. Ils ne veulent pas forcément dire cancer, mais mieux vaut faire vérifier.", ok: "Bien vu !", ko: "Pas tout à fait.",
@@ -228,7 +240,7 @@ const QUESTIONS = [
     g: "Des envies pressantes ou un jet faible qui durent ? Ce n’est pas forcément grave, mais parlez-en aussi à votre médecin." },
   { ic: "pie", q: "Environ quelle part des suicides concerne des hommes ?", o: ["1 sur 4", "La moitié", "3 sur 4", "9 sur 10"], a: 2,
     e: "Environ 3 suicides sur 4 sont le fait d’hommes. C’est pourquoi Movember encourage les hommes à parler, et leurs proches à leur tendre la main.", ok: "C’est ça.", ko: "Pas tout à fait.",
-    f: "En France, environ 9 000 décès par suicide chaque année, dont environ 3 sur 4 chez des hommes. Les hommes de 45 ans et plus sont les plus touchés.",
+    f: "En France, environ 9 000 décès par suicide chaque année, dont environ 3 sur 4 chez des hommes. Le taux de décès est environ trois fois plus élevé chez les hommes que chez les femmes.",
     g: "Un collègue vous inquiète ? Ne gardez pas ce doute pour vous : parlez-lui, et au besoin demandez conseil au 3114." },
   { ic: "phone", q: "Qui peut appeler le 3114 ?", o: ["Seulement une personne qui pense au suicide", "Toute personne en difficulté, mais aussi ses proches et les professionnels", "Uniquement les adultes, en journée", "Seulement sur recommandation d’un médecin"], a: 1,
     e: "Le 3114 est gratuit et ouvert 24h/24, 7j/7. Il répond aux personnes qui pensent au suicide, à leur entourage et aux professionnels, avec des soignants formés (infirmiers, psychologues).", ok: "Exactement !", ko: "Pas tout à fait.",
@@ -245,11 +257,41 @@ const QUESTIONS = [
 ];
 
 const $ = id => document.getElementById(id);
-const stache = $("stache");
-let i = 0, score = 0;
+const N = QUESTIONS.length;
+const KEY = "quiz-movember";
+const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
+let i = 0, order = [], picks = [];
+
+const shuffle = n => {
+  const a = [...Array(n).keys()];
+  for (let k = n - 1; k > 0; k--) {
+    const j = Math.floor(Math.random() * (k + 1));
+    [a[k], a[j]] = [a[j], a[k]];
+  }
+  return a;
+};
+const score = () => picks.reduce((s, p, k) => s + (p === QUESTIONS[k].a ? 1 : 0), 0);
+const answered = () => picks.filter(p => p !== null).length;
+
+function save() {
+  try { sessionStorage.setItem(KEY, JSON.stringify({ i, order, picks })); } catch (e) {}
+}
+
+function load() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem(KEY));
+    const ok = s && Number.isInteger(s.i) && s.i >= 0 && s.i <= N
+      && Array.isArray(s.order) && s.order.length === N
+      && Array.isArray(s.picks) && s.picks.length === N
+      && s.order.every((o, k) => Array.isArray(o) && o.length === QUESTIONS[k].o.length && [...o].sort().join() === [...o.keys()].join())
+      && s.picks.every((p, k) => p === null || (Number.isInteger(p) && p >= 0 && p < QUESTIONS[k].o.length))
+      && s.picks.slice(0, s.i).every(p => p !== null);
+    return ok ? s : null;
+  } catch (e) { return null; }
+}
 
 function setStache(n) {
-  $("revealRect").style.transform = `scaleX(${n / QUESTIONS.length})`;
+  $("revealRect").style.transform = `scaleX(${n / N})`;
 }
 
 function show(id) {
@@ -264,63 +306,124 @@ function renderProgress() {
 function renderQuestion() {
   const item = QUESTIONS[i];
   renderProgress();
-  $("count").textContent = `Question ${i + 1} sur ${QUESTIONS.length}`;
+  $("count").textContent = `Question ${i + 1} sur ${N}`;
   $("question").textContent = item.q;
   $("qicon").innerHTML = `<use href="#ic-${item.ic}"/>`;
-  $("feedback").classList.remove("show");
   const box = $("options");
   box.innerHTML = "";
-  item.o.forEach((text, k) => {
+  order[i].forEach(idx => {
     const b = document.createElement("button");
     b.className = "opt";
-    b.textContent = text;
-    b.addEventListener("click", () => answer(k));
+    b.dataset.idx = idx;
+    b.textContent = item.o[idx];
+    b.addEventListener("click", () => answer(idx));
     box.appendChild(b);
   });
+  $("prev").classList.toggle("hidden", i === 0);
+  $("next").textContent = i === N - 1 ? "Voir mon score" : "Question suivante";
+  if (picks[i] === null) $("feedback").classList.remove("show");
+  else showFeedback(false);
   if (i > 0) $("question").focus({ preventScroll: true });
-  $("next").textContent = i === QUESTIONS.length - 1 ? "Voir mon score" : "Question suivante";
 }
 
-function answer(k) {
+function answer(idx) {
+  if (picks[i] !== null) return;
+  picks[i] = idx;
+  save();
+  setStache(answered());
+  showFeedback(true);
+}
+
+function showFeedback(fresh) {
   const item = QUESTIONS[i];
-  const btns = [...$("options").children];
-  btns.forEach((b, idx) => {
+  const chosen = picks[i];
+  [...$("options").children].forEach(b => {
+    const idx = Number(b.dataset.idx);
     b.disabled = true;
-    if (idx === item.a) b.classList.add("right");
-    else if (idx === k) b.classList.add("wrong");
+    const note = document.createElement("span");
+    note.className = "sr-only";
+    if (idx === item.a) { b.classList.add("right"); note.textContent = " Bonne réponse."; }
+    else if (idx === chosen) { b.classList.add("wrong"); note.textContent = " Votre réponse, incorrecte."; }
     else b.classList.add("dim");
+    b.appendChild(note);
   });
-  const good = k === item.a;
-  if (good) score++;
-  setStache(i + 1);
+  const good = chosen === item.a;
   const v = $("verdict");
   v.textContent = good ? item.ok : item.ko;
   v.className = "verdict " + (good ? "good" : "bad");
   $("explain").textContent = item.e;
-  const x = item;
-  $("factText").textContent = x.f || ""; $("fact").classList.toggle("hidden", !x.f);
-  $("actText").textContent = x.g || ""; $("act").classList.toggle("hidden", !x.g);
+  $("factText").textContent = item.f || ""; $("fact").classList.toggle("hidden", !item.f);
+  $("actText").textContent = item.g || ""; $("act").classList.toggle("hidden", !item.g);
   $("feedback").classList.add("show");
-  $("next").focus({ preventScroll: true });
-  $("feedback").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  if (fresh) {
+    $("next").focus({ preventScroll: true });
+    $("feedback").scrollIntoView({ behavior: calm.matches ? "auto" : "smooth", block: "nearest" });
+  }
 }
 
 function finish() {
   show("result");
-  $("score").textContent = `${score}/${QUESTIONS.length}`;
+  setStache(N);
+  const s = score();
+  $("score").textContent = `${s}/${N}`;
   let level;
-  if (score <= 3) level = "Duvet naissant : la moustache ne demande qu’à pousser.";
-  else if (score <= 6) level = "Moustache prometteuse : encore quelques jours de novembre et c’est gagné.";
-  else if (score <= 9) level = "Belle bacchante : vous en savez déjà beaucoup.";
+  if (s <= 3) level = "Duvet naissant : la moustache ne demande qu’à pousser.";
+  else if (s <= 6) level = "Moustache prometteuse : encore quelques jours de novembre et c’est gagné.";
+  else if (s <= 9) level = "Belle bacchante : vous en savez déjà beaucoup.";
   else level = "Moustache légendaire : Dalí serait fier de vous.";
   $("level").textContent = level;
 }
 
-$("start").addEventListener("click", () => { i = 0; score = 0; setStache(0); show("quiz"); renderQuestion(); });
-$("next").addEventListener("click", () => { i++; if (i < QUESTIONS.length) renderQuestion(); else finish(); });
-$("restart").addEventListener("click", () => { i = 0; score = 0; setStache(0); show("quiz"); renderQuestion(); });
+function begin() {
+  order = QUESTIONS.map(q => shuffle(q.o.length));
+  picks = QUESTIONS.map(() => null);
+  i = 0;
+  save();
+  setStache(0);
+  show("quiz");
+  renderQuestion();
+}
+
+function resume() {
+  setStache(answered());
+  if (i >= N) finish();
+  else { show("quiz"); renderQuestion(); }
+}
+
+async function share(statusId) {
+  const url = location.origin + location.pathname;
+  const out = $(statusId);
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: "Quiz Movember", text: "Testez vos connaissances sur la moustache et la santé des hommes : 12 questions, sans inscription.", url });
+      out.textContent = "";
+    } else {
+      await navigator.clipboard.writeText(url);
+      out.textContent = "Lien copié.";
+    }
+  } catch (e) {
+    out.textContent = e && e.name === "AbortError" ? "" : `Copiez ce lien : ${url}`;
+  }
+}
+
+$("start").addEventListener("click", begin);
+$("restart").addEventListener("click", begin);
+$("resume").addEventListener("click", resume);
+$("next").addEventListener("click", () => { i++; save(); if (i < N) renderQuestion(); else finish(); });
+$("prev").addEventListener("click", () => { if (i > 0) { i--; save(); renderQuestion(); } });
+$("shareIntro").addEventListener("click", () => share("shareIntroStatus"));
+$("shareResult").addEventListener("click", () => share("shareResultStatus"));
 
 setStache(0);
+const saved = load();
+if (saved && (saved.i > 0 || saved.picks.some(p => p !== null))) {
+  ({ i, order, picks } = saved);
+  if (i >= N) resume();
+  else {
+    $("resume").textContent = `Reprendre (question ${i + 1} sur ${N})`;
+    $("resume").classList.remove("hidden");
+  }
+}
 </script>
 </body>
 </html>
