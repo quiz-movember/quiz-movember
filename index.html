@@ -390,19 +390,21 @@ function resume() {
   else { show("quiz"); renderQuestion(); }
 }
 
+const SHARE_URL = "https://quiz-movember.github.io/quiz-movember/";
+const SHARE_TEXT = "Testez vos connaissances sur la moustache et la santé des hommes : 12 questions, sans inscription.";
+
 async function share(statusId) {
-  const url = location.origin + location.pathname;
   const out = $(statusId);
   try {
     if (navigator.share) {
-      await navigator.share({ title: "Quiz Movember", text: "Testez vos connaissances sur la moustache et la santé des hommes : 12 questions, sans inscription.", url });
+      await navigator.share({ title: "Quiz Movember", text: SHARE_TEXT, url: SHARE_URL });
       out.textContent = "";
     } else {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(`${SHARE_URL}\n${SHARE_TEXT}`);
       out.textContent = "Lien copié.";
     }
   } catch (e) {
-    out.textContent = e && e.name === "AbortError" ? "" : `Copiez ce lien : ${url}`;
+    out.textContent = e && e.name === "AbortError" ? "" : `Copiez ce lien : ${SHARE_URL}`;
   }
 }
 
